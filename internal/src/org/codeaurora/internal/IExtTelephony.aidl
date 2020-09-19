@@ -141,6 +141,34 @@ interface IExtTelephony {
     boolean isFdnEnabled();
 
     /**
+    * Check if get the icc file handler from specific application family sucessfully
+    * @param slotId user preferred slotId.
+    * @param family UICC application family.
+    * @return true or false
+    */
+    boolean hasGetIccFileHandler(int slotId, int family);
+
+    /**
+    * Read the icc transparent file in the SIM card.
+    * @param slotId user preferred slotId.
+    * @param family UICC application family.
+    * @param efId the file ID in the SIM card.
+    * @return true or false
+    */
+    boolean readEfFromIcc(int slotId, int family, int efId);
+
+    /**
+    * Write the icc transparent file in the SIM card.
+    * @param slotId user preferred slotId.
+    * @param family UICC application family.
+    * @param efId the file ID in the SIM card.
+    * @param efdata updated data to the EF.
+    * @return true - send the request to load transparent files sucessfully
+    *         false - failed to get the icc file handler
+    */
+    boolean writeEfToIcc(int slotId, int family, int efId, in byte[] efData);
+
+    /**
     * Get primary stack phone id.
     * @param - void
     * @return phone id
@@ -261,6 +289,24 @@ interface IExtTelephony {
     String getSmscAddress(int slotId);
 
     /**
+    * Perform incremental scan using QCRIL hooks.
+    * @param - slotId
+    *          Range: 0 <= slotId < {@link TelephonyManager#getActiveModemCount()}
+    * @return true if the request has successfully been sent to the modem, false otherwise.
+    * Requires permission: android.Manifest.permission.MODIFY_PHONE_STATE
+    */
+    boolean performIncrementalScan(int slotId);
+
+    /**
+    * Abort incremental scan using QCRIL hooks.
+    * @param - slotId
+    *          Range: 0 <= slotId < {@link TelephonyManager#getActiveModemCount()}
+    * @return true if the request has successfully been sent to the modem, false otherwise.
+    * Requires permission: android.Manifest.permission.MODIFY_PHONE_STATE
+    */
+    boolean abortIncrementalScan(int slotId);
+
+    /**
     * Check if target available with given packageName.
     * @param packageName
     * @return true or false
@@ -274,35 +320,64 @@ interface IExtTelephony {
     */
     int getCurrentPrimaryCardSlotId();
 
-    // Async api
+    /**
+    * Async api
+    * @deprecated
+    */
     Token enable5g(int slotId, in Client client);
 
-    // Async api
+    /**
+    * Async api
+    * @deprecated
+    */
     Token disable5g(int slotId, in Client client);
 
-    // Async api
+    /**
+    * Async api
+    * @deprecated
+    */
     Token enable5gOnly(int slotId, in Client client);
 
-    // Async api
+    /**
+    * Async api
+    * @deprecated
+    */
     Token query5gStatus(int slotId, in Client client);
 
-    // Async api
-    // a.k.a NR EN-DC and restrict-DCNR.
+    /**
+    * Async api
+    * a.k.a NR EN-DC and restrict-DCNR.
+    * @deprecated
+    */
     Token queryNrDcParam(int slotId, in Client client);
 
-    // Async api
+    /**
+    * Async api
+    * @deprecated
+    */
     Token queryNrBearerAllocation(int slotId, in Client client);
 
-    // Async api
+    /**
+    * Async api
+    * @deprecated
+    */
     Token queryNrSignalStrength(int slotId, in Client client);
 
-    // Async api
+    /**
+    * Async api
+    * @deprecated
+    */
     Token queryUpperLayerIndInfo(int slotId, in Client client);
 
-    // Async api
+    /**
+    * Async api
+    * @deprecated
+    */
     Token query5gConfigInfo(int slotId, in Client client);
 
-    // Async api
+    /**
+    * Async api
+    */
     Token queryNrIconType(int slotId, in Client client);
 
     /**
@@ -326,10 +401,14 @@ interface IExtTelephony {
     */
     Token queryEndcStatus(int slotId, in Client client);
 
-    // Async api
+    /**
+    * Async api
+    */
     Client registerCallback(String packageName, INetworkCallback callback);
 
-    // Async api
+    /**
+    * Async api
+    */
     void unRegisterCallback(INetworkCallback callback);
 
     /**

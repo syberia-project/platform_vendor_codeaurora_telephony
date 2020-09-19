@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2015-2017, 2020 The Linux Foundation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -75,23 +75,6 @@ public class QtiImsExtUtils {
 
     public static final String QTI_IMS_STATIC_IMAGE_SETTING =
             "ims_vt_call_static_image";
-
-    /* name for call transfer setting */
-    private static final String IMS_CALL_TRANSFER_SETTING = "ims_call_transfer";
-
-    /**
-     * Definitions for the call transfer type. For easier implementation,
-     * the transfer type is defined as a bit mask value.
-     */
-    //Value representing blind call transfer type
-    public static final int QTI_IMS_BLIND_TRANSFER = 0x01;
-    //Value representing assured call transfer type
-    public static final int QTI_IMS_ASSURED_TRANSFER = 0x02;
-    //Value representing consultative call transfer type
-    public static final int QTI_IMS_CONSULTATIVE_TRANSFER = 0x04;
-
-    /* Call transfer extra key */
-    public static final String QTI_IMS_TRANSFER_EXTRA_KEY = "transferType";
 
     /* Ims phoneId extra key */
     public static final String QTI_IMS_PHONE_ID_EXTRA_KEY = "phoneId";
@@ -389,15 +372,6 @@ public class QtiImsExtUtils {
         return isCarrierConfigEnabled(phoneId, context, QtiCarrierConfigs.SHOW_VIDEO_QUALITY_UI);
     }
 
-    /***
-     * Checks if the IMS call transfer property is enabled or not.
-     * Returns true if enabled, or false otherwise.
-     */
-    public static boolean isCallTransferEnabled(Context context) {
-        return Settings.Global.getInt(context.getContentResolver(), IMS_CALL_TRANSFER_SETTING, 0)
-                == 1;
-    }
-
    /**
      * This API checks to see whether we are going to use ui extension for video call or not.
      * @param context context for getting video call ui ext configuration value
@@ -464,7 +438,7 @@ public class QtiImsExtUtils {
 
     public static boolean canHoldVideoCall(int phoneId, Context context) {
         return isCarrierConfigEnabled(phoneId, context,
-                QtiCarrierConfigs.ALLOW_HOLD_IN_VIDEO_CALL);
+                CarrierConfigManager.KEY_ALLOW_HOLD_VIDEO_CALL_BOOL);
     }
 
     //TODO not removing this deprecated API to avoid compilation errors.
@@ -475,33 +449,6 @@ public class QtiImsExtUtils {
     public static boolean shallRemoveModifyCallCapability(int phoneId, Context context) {
         return isCarrierConfigEnabled(phoneId, context,
                 QtiCarrierConfigs.REMOVE_MODIFY_CALL_CAPABILITY);
-    }
-
-    private static PersistableBundle getConfigForPhoneId(Context context, int phoneId) {
-        if (context == null) {
-            Log.e(LOG_TAG, "getConfigForPhoneId context is null");
-            return null;
-        }
-
-        CarrierConfigManager configManager = (CarrierConfigManager) context.getSystemService(
-                Context.CARRIER_CONFIG_SERVICE);
-        if (configManager == null) {
-            Log.e(LOG_TAG, "getConfigForPhoneId configManager is null");
-            return null;
-        }
-
-        if (phoneId == QtiCallConstants.INVALID_PHONE_ID) {
-            Log.e(LOG_TAG, "getConfigForPhoneId phoneId is invalid");
-            return null;
-        }
-
-        int subId = getSubscriptionIdFromPhoneId(context, phoneId);
-        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
-            Log.e(LOG_TAG, "getConfigForPhoneId subId is invalid");
-            return null;
-        }
-
-        return configManager.getConfigForSubId(subId);
     }
 
     /**
@@ -593,32 +540,27 @@ public class QtiImsExtUtils {
 
     // Returns true if Carrier supports RTT
     public static boolean isRttSupported(int phoneId, Context context) {
-        boolean isRttSupported = false;
-        PersistableBundle b = getConfigForPhoneId(context, phoneId);
-        if (b != null) {
-            isRttSupported = b.getBoolean(
-                    CarrierConfigManager.KEY_RTT_SUPPORTED_BOOL);
-        }
-        return isRttSupported;
+        return isCarrierConfigEnabled(phoneId, context,
+            CarrierConfigManager.KEY_RTT_SUPPORTED_BOOL);
     }
 
     // Returns true if Carrier supports RTT auto upgrade
     public static boolean isRttAutoUpgradeSupported(int phoneId, Context context) {
-        return (isCarrierConfigEnabled(phoneId, context,
-            QtiCarrierConfigs.KEY_CARRIER_RTT_AUTO_UPGRADE));
+        return isCarrierConfigEnabled(phoneId, context,
+            "rtt_auto_upgrade_bool");
     }
 
     // Returns true if Carrier supports RTT for Video Calls
     public static boolean isRttSupportedOnVtCalls(int phoneId, Context context) {
-        return (isCarrierConfigEnabled(phoneId, context,
-                QtiCarrierConfigs.KEY_CARRIER_RTT_SUPPORTED_ON_VTCALLS));
+        return isCarrierConfigEnabled(phoneId, context,
+            "rtt_supported_for_vt_bool");
     }
 
     // Returns true if Carrier supports RTT upgrade
     // False otherwise
     public static boolean isRttUpgradeSupported(int phoneId, Context context) {
-        return (isCarrierConfigEnabled(phoneId, context,
-                QtiCarrierConfigs.KEY_CARRIER_RTT_UPGRADE_SUPPORTED));
+        return isCarrierConfigEnabled(phoneId, context,
+            "rtt_upgrade_supported_bool");
     }
 
     // Utility to get the RTT Mode that is set through adb property
@@ -636,8 +578,8 @@ public class QtiImsExtUtils {
     // Returns true if Carrier supports RTT downgrade
     // False otherwise
     public static boolean isRttDowngradeSupported(int phoneId, Context context) {
-        return (isCarrierConfigEnabled(phoneId, context,
-                QtiCarrierConfigs.KEY_CARRIER_RTT_DOWNGRADE_SUPPORTED));
+        return isCarrierConfigEnabled(phoneId, context,
+            "rtt_downgrade_supported_bool");
     }
 
     // Returns true if Carrier support RTT visibility setting
@@ -672,5 +614,27 @@ public class QtiImsExtUtils {
     public static boolean canAcceptAsOneWayVideo(int phoneId, Context context) {
         return (isCarrierConfigEnabled(phoneId, context,
                 QtiCarrierConfigs.ALLOW_ONE_WAY_ACCEPT_FOR_VIDEO_CALL));
+    }
+
+    // Returns true if Carrier supports Call Composer
+    public static boolean isCallComposerSupported(int phoneId, Context context) {
+        return isCarrierConfigEnabled(phoneId, context,
+                QtiCarrierConfigs.KEY_CARRIER_CALL_COMPOSER_SUPPORTED);
+    }
+
+    // Stores user setting for Call Composer
+    public static void setCallComposerMode(ContentResolver contentResolver, int phoneId,
+            boolean turnOn) {
+        final int value = turnOn ? QtiCallConstants.CALL_COMPOSER_ENABLED :
+                QtiCallConstants.CALL_COMPOSER_DISABLED;
+        android.provider.Settings.Global.putInt(contentResolver,
+                QtiCallConstants.IMS_CALL_COMPOSER + phoneId, value);
+    }
+
+    // retrieves the stored user setting from the database per phone id
+    public static int getCallComposerMode(ContentResolver contentResolver, int phoneId) {
+        return android.provider.Settings.Global.getInt(contentResolver,
+                QtiCallConstants.IMS_CALL_COMPOSER + phoneId,
+                QtiCallConstants.AUTO_REJECT_CALL_DISABLED);
     }
 }

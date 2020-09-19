@@ -1,4 +1,4 @@
-/* Copyright (c) 2016-2019, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2016-2020, The Linux Foundation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -34,7 +34,7 @@ import android.telephony.ims.feature.ImsFeature;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-import com.android.ims.ImsConfig;
+import android.telephony.ims.stub.ImsConfigImplBase;
 
 import java.util.ArrayList;
 
@@ -126,16 +126,6 @@ public class QtiImsExtManager {
             mQtiImsExt.resumePendingCall(phoneId, videoState);
         } catch(RemoteException e) {
             throw new QtiImsException("Remote ImsService resumePendingCall : " + e);
-        }
-    }
-
-    public void sendCallTransferRequest(int phoneId, int type, String number,
-            IQtiImsExtListener listener) throws QtiImsException {
-        validateInvariants(phoneId);
-        try {
-            mQtiImsExt.sendCallTransferRequest(phoneId, type, number, listener);
-        } catch(RemoteException e) {
-            throw new QtiImsException("Remote ImsService sendCallTransferRequest : " + e);
         }
     }
 
@@ -248,7 +238,7 @@ public class QtiImsExtManager {
 
     public int setRcsAppConfig(int phoneId, int defaultSmsApp) throws QtiImsException {
         validateInvariants(phoneId);
-        int ret = ImsConfig.OperationStatusConstants.UNKNOWN;
+        int ret = ImsConfigImplBase.CONFIG_RESULT_UNKNOWN;
         try {
             ret = mQtiImsExt.setRcsAppConfig(phoneId, defaultSmsApp);
         } catch(RemoteException e) {
@@ -272,7 +262,7 @@ public class QtiImsExtManager {
 
     public int setVvmAppConfig(int phoneId, int defaultVvmApp) throws QtiImsException {
         validateInvariants(phoneId);
-        int ret = ImsConfig.OperationStatusConstants.UNKNOWN;
+        int ret = ImsConfigImplBase.CONFIG_RESULT_UNKNOWN;
         try {
             ret = mQtiImsExt.setVvmAppConfig(phoneId, defaultVvmApp);
         } catch(RemoteException e) {
@@ -353,27 +343,17 @@ public class QtiImsExtManager {
     }
 
     /**
-     * Used by clients to activate/deactivate call barring with password over IMS pipe.
-     *
+     * Used by clients to check if IMS service CALLCOMPOSER is enabled/disabled
      * @param phoneId indicates the phone instance which triggered the request
-     * @param operationType is false (CommandsInterface.CF_ACTION_ENABLE) or
-                               true (CommandsInterface.CF_ACTION_DISABLE)
-     * @param facilityType type of operation same as @link ImsUtInterface.CB_*
-     * @param cbNumListInfo ICB number list
-     * @param password Password to activate/deactivate the call barring.
-     * @param serviceClass service class for call barring @link CommandsInterface.SERVICE_CLASS*
-     * @param listener an IQtiImsExtListener instance to indicate the response
-     * @return void
+     * @return boolean
      */
-    public void setCallBarring(int phoneId, boolean operationType, String facilityType,
-            String[] cbNumListInfo, String password, int serviceClass, IQtiImsExtListener listener)
+    public boolean isCallComposerEnabled(int phoneId)
             throws QtiImsException {
         validateInvariants(phoneId);
         try {
-            mQtiImsExt.setCallBarring(phoneId, operationType, facilityType, cbNumListInfo, password,
-                    serviceClass, listener);
-        } catch(RemoteException e) {
-            throw new QtiImsException("Remote ImsService setCallBarring: " + e);
+            return mQtiImsExt.isCallComposerEnabled(phoneId);
+        } catch (RemoteException e) {
+            throw new QtiImsException("Remote ImsService isCallComposerEnabled: " + e);
         }
     }
 
