@@ -620,13 +620,24 @@ public class QtiImsExtUtils {
         return (isCarrierConfigEnabled(phoneId, context,
                 QtiCarrierConfigs.KEY_CARRIER_CANCEL_MODIFY_CALL_SUPPORTED));
     }
-
+   
+    // Obtain compatibility with older ims.apk and forward the old call to the new method 
+    public static int setAutoReject(ContentResolver contentResolver, int phoneId, boolean turnOn) {
+       final int value = turnOn ? QtiCallConstants.AR_MODE_AUTO_REJECT :
+                QtiCallConstants.AR_MODE_ALLOW_INCOMING;
+        return setAutoRejectMode(contentResolver, phoneId, value);
+    }
     // Supported for multi sim only. Allows user to set auto reject call mode for IMS MT calls
     // when high priority data is on the other sub
     public static void setAutoRejectMode(ContentResolver contentResolver, int phoneId,
             int arMode) {
         android.provider.Settings.Global.putInt(contentResolver,
                 QtiCallConstants.IMS_AUTO_REJECT_MODE + phoneId, arMode);
+    }
+
+    // Obtain compatibility with older ims.apk and forward the old call to the new method
+    public static int getAutoReject(ContentResolver contentResolver, int phoneId) {
+        return getAutoRejectMode(contentResolver, phoneId);
     }
 
     // Supported for multi sim only.
